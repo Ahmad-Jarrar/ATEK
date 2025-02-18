@@ -8,7 +8,7 @@ python_library(
         "obb3_csv_io.py",
     ],
     base_module = "atek.evaluation.static_object_detection",
-    tags = ["noautodeps"],
+    labels = ["noautodeps"],
     deps = [
         "//caffe2:torch",
     ],
@@ -20,7 +20,7 @@ python_library(
         "eval_obb3_metrics_utils.py",
     ],
     base_module = "atek.evaluation.static_object_detection",
-    tags = ["noautodeps"],
+    labels = ["noautodeps"],
     deps = [
         "//caffe2:torch",
         "//vision/fair/pytorch3d/pytorch3d:pytorch3d",
