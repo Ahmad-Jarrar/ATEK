@@ -25,6 +25,7 @@ from atek.data_preprocess.sample_builders.atek_data_paths_provider import (
 )
 from atek.data_preprocess.sample_builders.efm_sample_builder import EfmSampleBuilder
 from atek.data_preprocess.sample_builders.obb_sample_builder import ObbSampleBuilder
+from atek.data_preprocess.sample_builders.slam_sample_builder import SLAMSampleBuilder
 from atek.data_preprocess.subsampling_lib.temporal_subsampler import (
     CameraTemporalSubsampler,
 )
@@ -167,6 +168,69 @@ def _create_efm_type_preprocessor(
     )
 
 
+def _create_slam_type_preprocessor(
+    conf: DictConfig,
+    raw_data_folder: str,
+    sequence_name: str,
+    output_wds_folder: Optional[str] = None,
+    output_viz_file: Optional[str] = None,
+    category_mapping_file: Optional[str] = None,
+) -> GeneralAtekPreprocessor:
+    # Get data paths
+    data_path_provider = AtekDataPathsProvider(data_root_path=raw_data_folder)
+    atek_data_paths = data_path_provider.get_data_paths()
+
+    # Create Sample Builder
+    # TODO: refactor to let the sample builder take the data paths object as an input
+    sample_builder = SLAMSampleBuilder(
+        conf=conf.processors,
+        vrs_file=atek_data_paths["video_vrs_file"],
+        sequence_name=sequence_name,
+        mps_files={
+            "mps_closedloop_traj_file": atek_data_paths["mps_closedloop_traj_file"],
+        },
+        gt_files={
+            "obb3_file": atek_data_paths["gt_obb3_file"],
+            "obb3_traj_file": atek_data_paths["gt_obb3_traj_file"],
+            "obb2_file": atek_data_paths["gt_obb2_file"],
+            "instance_json_file": atek_data_paths["gt_instance_json_file"],
+            "category_mapping_file": category_mapping_file,
+        },
+        depth_vrs_file=atek_data_paths["depth_images_vrs_file"],
+        segmentation_vrs_file=atek_data_paths["segmentations_vrs_file"],
+        synthetic_vrs_file=atek_data_paths["synthetic_video_vrs_file"],
+    )
+
+    # Create temporal subsampler
+    subsampler = CameraTemporalSubsampler(
+        vrs_file=atek_data_paths["video_vrs_file"],
+        conf=conf.camera_temporal_subsampler,
+    )
+
+    # Create WDS writer
+    if "wds_writer" in conf and output_wds_folder is not None:
+        atek_wds_writer = AtekWdsWriter(
+            output_path=output_wds_folder,
+            conf=conf.wds_writer,
+        )
+    else:
+        atek_wds_writer = None
+
+    # Create visualizer
+    if "visualizer" in conf:
+        atek_visualizer = NativeAtekSampleVisualizer(
+            conf=conf.visualizer, output_viz_file=output_viz_file
+        )
+    else:
+        atek_visualizer = None
+
+    return GeneralAtekPreprocessor(
+        sample_builder=sample_builder,
+        subsampler=subsampler,
+        atek_wds_writer=atek_wds_writer,
+        atek_visualizer=atek_visualizer,
+    )
+
 def create_general_atek_preprocessor_from_conf(
     conf: DictConfig,
     raw_data_folder: str,
@@ -193,6 +257,17 @@ def create_general_atek_preprocessor_from_conf(
     # EFM flavor
     if conf.atek_config_name in ["efm", "efm_eval"]:
         return _create_efm_type_preprocessor(
+            conf=conf,
+            raw_data_folder=raw_data_folder,
+            sequence_name=sequence_name,
+            output_wds_folder=output_wds_folder,
+            output_viz_file=output_viz_file,
+            category_mapping_file=category_mapping_file,
+        )
+    
+    # SLAM flavor
+    if conf.atek_config_name in ["SLAM", ]:
+        return _create_slam_type_preprocessor(
             conf=conf,
             raw_data_folder=raw_data_folder,
             sequence_name=sequence_name,

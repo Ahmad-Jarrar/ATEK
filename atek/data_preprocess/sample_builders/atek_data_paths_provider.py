@@ -57,6 +57,15 @@ def _get_possible_file_conventions() -> Dict[str, List[str]]:
         "gt_obb3_traj_file": ["scene_objects.csv"],
         "gt_obb2_file": ["2d_bounding_box.csv"],
         "gt_instance_json_file": ["instances.json"],
+        "synthetic_video_vrs_file": ["synthetic_video.vrs"],
+        "depth_images_vrs_file": [
+            "depth_images.vrs",
+            "depth_images_with_skeleton.vrs",
+            ],
+        "segmentations_vrs_file": [
+            "segmentations.vrs", 
+            "segmentations_with_skeleton.vrs",
+        ],
     }
 
 
