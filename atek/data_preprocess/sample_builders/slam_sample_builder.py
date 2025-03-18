@@ -165,7 +165,7 @@ class SLAMSampleBuilder:
             ), "need to specify synthetic vrs file to use Image processor"
 
             processors["rgb_synthetic"] = AriaCameraProcessor(
-                vidio_vrs=self.synthetic_vrs_file,
+                video_vrs=self.synthetic_vrs_file,
                 conf=conf.rgb_synthetic,
             )
             selected_camera_label_to_stream_ids["rgb_synthetic"] = (
