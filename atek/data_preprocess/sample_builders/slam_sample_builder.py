@@ -246,13 +246,13 @@ class SLAMSampleBuilder:
                     final_camera_calib.get_transform_device_camera().to_matrix3x4()
                 )
                 sample_camera_data.camera_model_name = str(
-                    final_camera_calib.model_name()
+                    final_camera_calib.get_model_name()
                 )
                 sample_camera_data.projection_params = torch.from_numpy(
-                    final_camera_calib.projection_params()
+                    final_camera_calib.get_projection_params()
                 )
                 sample_camera_data.camera_valid_radius = torch.tensor(
-                    [final_camera_calib.get_valid_radius()], dtype=torch.float32
+                    [final_camera_calib.get_valid_radius() if final_camera_calib.get_valid_radius() else 0], dtype=torch.float32
                 )
 
                 setattr(
